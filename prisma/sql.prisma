@@ -1,0 +1,20 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/sql"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("SQLSERVER_URL")
+  schemas  = ["app", "import", "dbo"]
+}
+
+model products {
+  id Int @id
+
+  @@schema("app")
+}

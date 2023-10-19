@@ -1,0 +1,385 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/sql"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("SQLSERVER_URL")
+  schemas  = ["app", "import", "dbo"]
+}
+
+model products {
+  id                   Int       @id
+  vendor_product_code  String?
+  product_code         String?
+  short_description    String?
+  long_description     String?
+  vendor_code          String?
+  vendor_name          String?
+  category_code        String?
+  category_name        String?
+  is_renewable         Boolean
+  is_intra_relevant    Boolean
+  is_serialized        Boolean
+  duration             String?
+  maintenance_category String?
+  eol_date             DateTime?
+  eos_date             DateTime?
+  last_order_date      DateTime?
+  comment              String?
+  status               String?
+
+  @@schema("app")
+}
+
+model product_standard_list_price {
+  id                      Int       @id
+  product_code            String?
+  vendor_product_code     String?
+  status                  String?
+  currency_code           String?
+  list_price              Float?    @db.Money
+  price_book_date         DateTime?
+  alternative_price_1_tag String?
+  alternative_price_1     Float?    @db.Money
+  alternative_price_2_tag String?
+  alternative_price_2     Float?    @db.Money
+  alternative_price_3_tag String?
+  alternative_price_3     Float?    @db.Money
+  alternative_price_4_tag String?
+  alternative_price_4     Float?    @db.Money
+
+  @@schema("app")
+}
+
+model product_shipment_information {
+  id                  Int      @id
+  product_code        String?
+  vendor_product_code String?
+  status              String?
+  intra_code          Int?
+  country_of_origin   String?
+  ushts_code          BigInt?
+  useccn_number       String?
+  packaged_weight_kg  Decimal?
+  packaged_width_mm   Int
+  packaged_length_mm  Int
+  packaged_height_mm  Int
+  deliverable         String?
+
+  @@schema("app")
+}
+
+model product_vendor_product_information {
+  id                      Int     @id
+  product_code            String?
+  vendor_product_code     String?
+  status                  String?
+  vendor_product_category String?
+  vendor_product_family   String?
+  vendor_product_line     String?
+  vendor_product_type     String?
+  vendor_material_type    String?
+
+  @@schema("app")
+}
+
+model master_data_vendors {
+  id                           Int     @id
+  code                         String  @unique
+  name                         String?
+  default_maintenance_category String?
+
+  @@schema("app")
+}
+
+model master_data_ushts_codes {
+  id          BigInt  @id
+  description String?
+
+  @@schema("app")
+}
+
+model master_data_useccn_numbers {
+  id          Int     @id
+  code        String  @unique
+  description String?
+
+  @@schema("app")
+}
+
+model master_data_intrastat_codes {
+  id                 Int       @id
+  description_de     String?
+  description_en     String?
+  supplemantary_unit String?
+  effective_date     DateTime?
+  expired_date       DateTime?
+  predecessor        Int?
+
+  @@schema("app")
+}
+
+model master_data_erp_product_category {
+  id                Int     @id
+  code              String  @unique
+  name              String?
+  description       String?
+  is_renewable      Boolean
+  is_intra_relevant Boolean
+
+  @@schema("app")
+}
+
+model master_data_deliverables {
+  id          Int     @id
+  code        String? @unique
+  name        String?
+  description String?
+
+  @@schema("app")
+}
+
+model admin_sheet_names {
+  id          Int     @id
+  vendor_id   Int
+  sheet_name  String
+  active      Boolean
+  currency_id Int
+  is_exact    Boolean
+
+  @@schema("import")
+}
+
+model admin_sheet_config {
+  id           Int @id
+  vendor_id    Int
+  sheet_id     Int @unique
+  start_column Int
+  end_column   Int
+  start_row    Int
+  end_row      Int
+
+  @@schema("import")
+}
+
+model admin_attribute_lookup {
+  id           Int     @id
+  vendor_id    Int
+  sheet_id     Int
+  sql_name     String
+  excel_name   String
+  is_mandatory Boolean
+
+  @@schema("import")
+}
+
+model jun_mist {
+  id                             Int       @id(map: "PK__juniper___3213E83F4FB2358D") @default(autoincrement())
+  change_type                    String?   @db.NVarChar(1)
+  product_category               String?
+  product_family                 String?
+  product_line                   String?
+  product_number                 String    @db.NVarChar(100)
+  product_type                   String?
+  product_compatibility          String?
+  material_type                  String?
+  service_type                   String?   @db.NVarChar(255)
+  long_description               String?
+  short_description              String?
+  product_list_price             String?   @db.NVarChar(255)
+  service_price_cat_1            String?   @db.NVarChar(100)
+  service_price_cat_2            String?   @db.NVarChar(100)
+  service_price_cat_3            String?   @db.NVarChar(100)
+  service_price_cat_4            String?   @db.NVarChar(100)
+  discountable                   String?   @db.VarChar(3)
+  stockable                      String?   @db.VarChar(3)
+  material_status                String?   @db.NVarChar(255)
+  partner_certification_level    String?
+  partner_product_specialization String?
+  last_order_date                DateTime? @db.Date
+  eol_replacement                String?   @db.NVarChar(255)
+  serialized                     String?   @db.VarChar(3)
+  country_of_origin              String?   @db.NVarChar(255)
+  ccat                           String?
+  us_eccn                        String?
+  us_hts                         String?
+  packaged_gross_weight_lbs      String?   @db.VarChar(100)
+  packaged_height_in             String?   @db.VarChar(100)
+  packaged_width_in              String?   @db.VarChar(100)
+  packaged_length_in             String?   @db.VarChar(100)
+  price_book_date                DateTime? @db.Date
+  ordering_note                  String?   @db.NVarChar(1000)
+  user_email                     String    @db.VarChar(255)
+
+  @@schema("import")
+}
+
+model jun_price_list {
+  id                             Int       @id(map: "PK__juniper___3213E83FE2A37183") @default(autoincrement())
+  change_type                    String?   @db.VarChar(1)
+  product_category               String?
+  product_family                 String?
+  product_line                   String?
+  product_number                 String    @db.VarChar(100)
+  product_type                   String?
+  product_compatibility          String?
+  material_type                  String?
+  service_type                   String?   @db.NVarChar(255)
+  long_description               String?
+  short_description              String?
+  product_list_price             String?   @db.VarChar(100)
+  service_price_cat_1            String?   @db.VarChar(100)
+  service_price_cat_2            String?   @db.VarChar(100)
+  service_price_cat_3            String?   @db.VarChar(100)
+  service_price_cat_4            String?   @db.VarChar(100)
+  discountable                   String?   @db.VarChar(3)
+  stockable                      String?   @db.VarChar(3)
+  material_status                String?   @db.NVarChar(255)
+  partner_certification_level    String?
+  partner_product_specialization String?
+  last_order_date                DateTime? @db.Date
+  eol_replacement                String?   @db.NVarChar(255)
+  serialized                     String?   @db.VarChar(3)
+  country_of_origin              String?   @db.NVarChar(255)
+  ccat                           String?
+  us_eccn                        String?
+  us_hts                         String?
+  packaged_gross_weight_lbs      String?   @db.VarChar(100)
+  packaged_height_in             String?   @db.VarChar(100)
+  packaged_width_in              String?   @db.VarChar(100)
+  packaged_length_in             String?   @db.VarChar(100)
+  price_book_date                DateTime? @db.Date
+  user_email                     String    @db.NVarChar(255)
+
+  @@schema("import")
+}
+
+model jun_renewal {
+  id                  Int       @id(map: "PK__juniper___3213E83FACD1371F") @default(autoincrement())
+  product_number      String    @db.NVarChar(100)
+  service_type        String?   @db.NVarChar(255)
+  description         String?
+  service_price_cat_1 String?   @db.NVarChar(100)
+  service_price_cat_2 String?   @db.NVarChar(100)
+  service_price_cat_3 String?   @db.NVarChar(100)
+  service_price_cat_4 String?   @db.NVarChar(100)
+  last_order_date     DateTime? @db.Date
+  end_of_service_date String?   @db.VarChar(255)
+  user_email          String    @db.NVarChar(255)
+
+  @@schema("import")
+}
+
+model vendor {
+  id                        Int                      @id
+  code                      String?
+  name                      String
+  street                    String?
+  zip                       String?
+  country_code              String?
+  default_maint_category_id Int?
+  created                   DateTime?
+  changed                   DateTime?
+  rv                        Unsupported("timestamp")
+
+  @@schema("dbo")
+}
+
+model update_open_transactions {
+  transaction_id  String   @unique @db.UniqueIdentifier
+  transaction_msg String?  @db.NVarChar(1000)
+  user_tag        String   @db.NVarChar(255)
+  transaction_tag String?  @db.VarChar(100)
+  created         DateTime @db.DateTime2
+  status_code     Int      @db.TinyInt
+  status_name     String   @db.VarChar(100)
+
+  @@schema("app")
+}
+
+model update_staged_field_changes {
+  record_id      String  @unique @db.UniqueIdentifier
+  transaction_id String  @unique @db.UniqueIdentifier
+  vendor_code    String? @db.VarChar(10)
+  product_code   String? @db.VarChar(100)
+  field_name     String  @db.VarChar(24)
+  field_category String  @db.VarChar(21)
+  current_value  String? @db.NVarChar(1000)
+  new_value      String? @db.NVarChar(1000)
+  change_type    String  @db.VarChar(7)
+
+  @@schema("app")
+}
+
+model update_staged_records {
+  record_id                   String    @unique @db.UniqueIdentifier
+  transaction_id              String    @unique @db.UniqueIdentifier
+  is_new_product              Boolean?  @db.Bit
+  vendor_code                 String?   @db.VarChar(10)
+  vendor_id                   Int?      @db.Int
+  product_code                String?   @db.VarChar(100)
+  product_id                  Int?      @db.Int
+  long_desc                   String?   @db.NVarChar(1000)
+  short_desc                  String?   @db.NVarChar(100)
+  product_category            String?   @db.VarChar(100)
+  product_category_id         Int?      @db.Int
+  product_family              String?   @db.NVarChar(100)
+  product_family_id           Int?      @db.Int
+  product_line                String?   @db.NVarChar(100)
+  product_line_id             Int?      @db.Int
+  product_type                String?   @db.VarChar(100)
+  product_type_id             Int?      @db.Int
+  material_type               String?   @db.VarChar(100)
+  material_type_id            Int?      @db.Int
+  erp_category                String?   @db.VarChar(100)
+  erp_category_id             Int?      @db.Int
+  erp_maintenance_category    String?   @db.VarChar(100)
+  erp_maintenance_category_id Int?      @db.Int
+  currency_code               String?   @db.Char(3)
+  currency_id                 Int?      @db.Int
+  list_price                  Float?    @db.Money
+  alt_price_1                 Float?    @db.Money
+  alt_price_2                 Float?    @db.Money
+  alt_price_3                 Float?    @db.Money
+  alt_price_4                 Float?    @db.Money
+  price_book_date             DateTime? @db.Date
+  is_scaleable                Boolean?  @db.Bit
+  is_serialized               Boolean?  @db.Bit
+  intra_code                  Int?      @db.Int
+  us_hts_code                 BigInt?   @db.BigInt
+  us_eccn_code                String?   @db.VarChar(12)
+  us_eccn_code_id             Int?      @db.Int
+  eol_date                    DateTime? @db.Date
+  eos_date                    DateTime? @db.Date
+  last_order_date             DateTime? @db.Date
+  packaged_weight_kg          Int?      @db.Int
+  packaged_length_mm          Int?      @db.Int
+  packaged_width_mm           Int?      @db.Int
+  packaged_height_mm          Int?      @db.Int
+  duration_code               String?   @db.VarChar(100)
+  duration_id                 Int?      @db.Int
+  deliverable_code            String?   @db.VarChar(100)
+  deliverable_id              Int?      @db.Int
+
+  @@schema("app")
+}
+
+model application_field_names {
+  schema_id       Int     @db.Int
+  schema_name     String? @db.NVarChar(128)
+  object_id       Int     @db.Int
+  table_name      String
+  full_table_name String? @db.NVarChar(1000)
+  column_id       Int     @db.Int
+  column_name     String
+  friendly_name   String  @db.NVarChar(255)
+
+  @@unique([table_name, column_name])
+  @@schema("app")
+}
